@@ -15,11 +15,11 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <!-- Feel free to update to what you want, but remember that --> 
     <!-- ImageJ plugins require an underscore '_' in the name... --> 
     <groupId>net.ijtools</groupId>
-    <artifactId>Plugin_Template</artifactId>
+    <artifactId>Sliding_Strel</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
-    <name>plugins/Plugin_Template.jar</name>
-    <description>Simple project template for ImageJ plugins</description>
+    <name>plugins/Sliding_ètrel.jar</name>
+    <description>Morphological dilation and erosion using sliding structuring elements</description>
 
     <dependencies>
         <!-- When writing ImageJ/Fiji plugins, it is necessary to add a dependency 
@@ -47,17 +47,11 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             <resource>
                 <directory>${basedir}/src/main/resources</directory>
             </resource>
-            <resource>
-                <directory>${project.build.sourceDirectory}</directory>
-            </resource>
         </resources>
         
         <testResources>
             <testResource>
                 <directory>${basedir}/src/test/resources</directory>
-            </testResource>
-            <testResource>
-                <directory>${project.build.testSourceDirectory}</directory>
             </testResource>
         </testResources>
         
