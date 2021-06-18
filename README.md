@@ -1,22 +1,10 @@
-# imagej-plugin-template
-Simple project template for creating ImageJ Plugins.
+# Sliding Strel plugin
 
-The aim is to provide a quick way to start a plugin for ImageJ, using the "legacy" plugin style. 
+Implementation of mathematical morphology based filtering using sliding structuring elements,
+provided as plugins for the ImageJ software.
 
-The project is based on maven. It uses sci-java as parent configuration. The parent configuration 
-is somewhat old (1.126), but I encountered configuration troubles with more recent ones. 
-
-The base configuration has few dependencies:
-
+This implementation has the following dependencies:
 * ImageJ
 * JUnit
+* MorphoLibJ (for iamge utilities, and comparison with other implementations)
 
-## Installation
-
-Simply clone the project into the directory of your choice. 
-Then you can edit the pom.xml with informations specific to the project. 
-In particular, the name of the project is used by the Eclipse IDE to index
-the project.
-
-A sample plugin file is provided in `src/main/java/net.ijt/DemoPlugin.java` file.
-The plugin configuration file is in `src/main/resources/plugins.config`.

@@ -18,7 +18,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <artifactId>Sliding_Strel</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
-    <name>plugins/Sliding_ètrel.jar</name>
+    <name>plugins/Sliding_Strel.jar</name>
     <description>Morphological dilation and erosion using sliding structuring elements</description>
 
     <dependencies>
