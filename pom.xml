@@ -38,6 +38,13 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             <scope>test</scope>
         </dependency>
         
+		<!-- https://mvnrepository.com/artifact/com.github.ijpb/MorphoLibJ -->
+		<dependency>
+		    <groupId>com.github.ijpb</groupId>
+		    <artifactId>MorphoLibJ</artifactId>
+		    <version>v1.4.1</version>
+		</dependency>
+		
     </dependencies>
     
     
