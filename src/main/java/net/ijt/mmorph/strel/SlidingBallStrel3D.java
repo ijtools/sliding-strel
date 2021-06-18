@@ -148,7 +148,7 @@ public class SlidingBallStrel3D extends AbstractStrel3D
         {
             return slidingDilationUInt8(image);
         }
-        throw new RuntimeException("Requies a stack of ByteProcessor");
+        throw new RuntimeException("Requires a stack of ByteProcessor");
     }
     
     private ImageStack slidingDilationUInt8(ImageStack stack)
@@ -242,7 +242,7 @@ public class SlidingBallStrel3D extends AbstractStrel3D
                         }
                     }
 
-                    res.set(x, y, z, (int) localHisto.getMinValue());
+                    res.set(x, y, z, (int) localHisto.getMaxValue());
                 }
             }
         }
@@ -260,7 +260,7 @@ public class SlidingBallStrel3D extends AbstractStrel3D
         {
             return slidingErosionUInt8(image);
         }
-        throw new RuntimeException("Requies a stack of ByteProcessor");
+        throw new RuntimeException("Requires a stack of ByteProcessor");
     }
     
     private ImageStack slidingErosionUInt8(ImageStack stack)

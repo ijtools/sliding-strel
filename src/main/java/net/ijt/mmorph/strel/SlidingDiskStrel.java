@@ -3,6 +3,7 @@
  */
 package net.ijt.mmorph.strel;
 
+import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import inra.ijpb.morphology.Strel;
 import inra.ijpb.morphology.strel.AbstractStrel;
@@ -112,31 +113,201 @@ public class SlidingDiskStrel extends AbstractStrel implements Strel
     // Implementation of the Strel interface
 
     @Override
-    public ImageProcessor dilation(ImageProcessor image)
+    public ImageProcessor dilation(ImageProcessor array)
     {
-        // TODO Auto-generated method stub
-        return null;
+        if (array instanceof ByteProcessor)
+        {
+            return slidingDilationUInt8((ByteProcessor) array);
+        }
+        throw new RuntimeException("Requires array to be a ByteProcessor");
+    }
+    
+    private ByteProcessor slidingDilationUInt8(ByteProcessor array)
+    {
+        // get array size
+        int sizeX = array.getWidth();
+        int sizeY = array.getHeight();
+        
+        // number of non zero elements 
+        int count = elementCount();
+        int nOffsets = this.xOffsets.length;
+        
+        // create local histogram instance
+        final int OUTSIDE = 0;
+        LocalHistogramUInt8 localHisto = new LocalHistogramUInt8(count, OUTSIDE);
+
+        // Allocate result
+        ByteProcessor res = (ByteProcessor) array.duplicate();
+        
+        // temp variables for updating local histogram
+        int vOld, vNew;
+        
+        // Iterate on image rows indexed by y
+        for (int y = 0; y < sizeY; y++)
+        {
+            fireProgressChanged(this, y, sizeY);
+            
+            // init local histogram with background values
+            localHisto.reset(count, OUTSIDE);
+
+            // update initialization with visible neighbors
+            for (int x = -intRadius; x < 0; x++)
+            {
+                // iterate over the list of offsets
+                for (int i = 0; i < nOffsets; i++)
+                {
+                    int y2 = y + this.yOffsets[i];
+                    if (y2 < 0 || y2 >= sizeY)
+                    {
+                        continue;
+                    }
+
+                    int x2 = x + this.xOffsets[i];
+                    if (x2 < 0 || x2 >= sizeX)
+                    {
+                        continue;
+                    }
+                    localHisto.replace(OUTSIDE, array.get(x2, y2));
+                }
+            }   
+
+            // iterate along "middle" values
+            for (int x = 0; x < sizeX; x++)
+            {
+                // iterate over the list of offsets
+                for (int i = 0; i < nOffsets; i++)
+                {
+                    // current line offset
+                    int y2 = y + this.yOffsets[i];
+
+                    // We need to test values only for lines within array bounds
+                    if (y2 >= 0 && y2 < sizeY)
+                    {
+                        // old value
+                        int x2 = x - this.xOffsets[i] - 1;
+                        vOld = (x2 >= 0 && x2 < sizeX) ? array.get(x2, y2) : OUTSIDE;
+
+                        // new value
+                        x2 = x + this.xOffsets[i];
+                        vNew = (x2 >= 0 && x2 < sizeX) ? array.get(x2, y2) : OUTSIDE;
+
+                        localHisto.replace(vOld, vNew);
+                    }
+                }
+
+                res.set(x, y, (int) localHisto.getMaxValue());
+            }
+        }
+
+        // clear the progress bar
+        fireProgressChanged(this, sizeY, sizeY);
+
+        return res;
     }
 
     @Override
-    public ImageProcessor erosion(ImageProcessor image)
+    public ImageProcessor erosion(ImageProcessor array)
     {
-        // TODO Auto-generated method stub
-        return null;
+        if (array instanceof ByteProcessor)
+        {
+            return slidingErosionUInt8((ByteProcessor) array);
+        }
+        throw new RuntimeException("Requires array to be a ByteProcessor");
+    }
+
+    private ByteProcessor slidingErosionUInt8(ByteProcessor array)
+    {
+        // get array size
+        int sizeX = array.getWidth();
+        int sizeY = array.getHeight();
+        
+        // number of non zero elements 
+        int count = elementCount();
+        int nOffsets = this.xOffsets.length;
+        
+        // create local histogram instance
+        final int OUTSIDE = 255;
+        LocalHistogramUInt8 localHisto = new LocalHistogramUInt8(count, OUTSIDE);
+
+        // Allocate result
+        ByteProcessor res = (ByteProcessor) array.duplicate();
+        
+        // temp variables for updating local histogram
+        int vOld, vNew;
+        
+        // Iterate on image rows indexed by y
+        for (int y = 0; y < sizeY; y++)
+        {
+            fireProgressChanged(this, y, sizeY);
+
+            // init local histogram with background values
+            localHisto.reset(count, OUTSIDE);
+
+            // update initialization with visible neighbors
+            for (int x = -intRadius; x < 0; x++)
+            {
+                // iterate over the list of offsets
+                for (int i = 0; i < nOffsets; i++)
+                {
+                    int y2 = y + this.yOffsets[i];
+                    if (y2 < 0 || y2 >= sizeY)
+                    {
+                        continue;
+                    }
+
+                    int x2 = x + this.xOffsets[i];
+                    if (x2 < 0 || x2 >= sizeX)
+                    {
+                        continue;
+                    }
+                    localHisto.replace(OUTSIDE, array.get(x2, y2));
+                }
+            }   
+
+            // iterate along "middle" values
+            for (int x = 0; x < sizeX; x++)
+            {
+                // iterate over the list of offsets
+                for (int i = 0; i < nOffsets; i++)
+                {
+                    // current line offset
+                    int y2 = y + this.yOffsets[i];
+
+                    // We need to test values only for lines within array bounds
+                    if (y2 >= 0 && y2 < sizeY)
+                    {
+                        // old value
+                        int x2 = x - this.xOffsets[i] - 1;
+                        vOld = (x2 >= 0 && x2 < sizeX) ? array.get(x2, y2) : OUTSIDE;
+
+                        // new value
+                        x2 = x + this.xOffsets[i];
+                        vNew = (x2 >= 0 && x2 < sizeX) ? array.get(x2, y2) : OUTSIDE;
+
+                        localHisto.replace(vOld, vNew);
+                    }
+                }
+
+                res.set(x, y, (int) localHisto.getMinValue());
+            }
+        }
+
+        // clear the progress bar
+        fireProgressChanged(this, sizeY, sizeY);
+        
+        return res;
     }
 
     @Override
-    public ImageProcessor closing(ImageProcessor image)
+    public ImageProcessor closing(ImageProcessor array)
     {
-        // TODO Auto-generated method stub
-        return null;
+        return erosion(dilation(array));
     }
 
     @Override
-    public ImageProcessor opening(ImageProcessor image)
+    public ImageProcessor opening(ImageProcessor array)
     {
-        // TODO Auto-generated method stub
-        return null;
+        return dilation(erosion(array));
     }
 	
     /* (non-Javadoc)
@@ -228,5 +399,4 @@ public class SlidingDiskStrel extends AbstractStrel implements Strel
 	{
 		return this;
 	}
-
 }
