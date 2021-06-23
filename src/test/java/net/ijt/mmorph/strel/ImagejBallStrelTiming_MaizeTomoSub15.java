@@ -65,7 +65,7 @@ public class ImagejBallStrelTiming_MaizeTomoSub15
             for (int iRadius = 0; iRadius < radiusList.length; iRadius++)
             {
                 double radius = radiusList[iRadius];
-                Strel3D strel = new SlidingBallStrel3D(radius);
+                Strel3D strel = Strel3D.Shape.BALL.fromRadius((int) radius);
                 
                 long t0 = System.nanoTime();
                 strel.dilation(image);

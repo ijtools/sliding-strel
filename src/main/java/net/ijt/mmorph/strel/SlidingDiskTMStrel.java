@@ -10,24 +10,11 @@ import inra.ijpb.morphology.Strel;
 import inra.ijpb.morphology.strel.AbstractStrel;
 
 /**
- * <pre>{@code
-    // Creates a disk structuring element with radius 6
-    Strel2D strel = new SlidingDiskStrel(6);
-    
-    // Creates a simple array with white dot in the middle
-    UInt8Array2D array = UInt8Array2D.create(15, 15);
-    array.setValue(7, 7, 255);
-    
-    // applies dilation on array
-    ScalarArray2D<?> dilated = strel.dilation(array);
-    
-    // display result
-    dilated.print(System.out);
- * }</pre>
- * @author dlegland
+ * The same as SlidingDiskStrel, except that it uses a TreeMap for processing
+ * float processors.
  *
  */
-public class SlidingDiskStrel extends AbstractStrel implements Strel
+public class SlidingDiskTMStrel extends AbstractStrel implements Strel
 {
     // ==================================================
     // Class variables
@@ -65,7 +52,7 @@ public class SlidingDiskStrel extends AbstractStrel implements Strel
      * @param radius
      *            the radius of the disk structuring element, in pixels.
      */
-    public SlidingDiskStrel(double radius)
+    public SlidingDiskTMStrel(double radius)
     {
         this.radius = radius;
         
@@ -222,7 +209,7 @@ public class SlidingDiskStrel extends AbstractStrel implements Strel
         
         // create local histogram instance
         final double OUTSIDE = Double.NEGATIVE_INFINITY;
-        LocalHistogramDoubleHashMap localHisto = new LocalHistogramDoubleHashMap(count, OUTSIDE);
+        LocalHistogramDoubleTreeMap localHisto = new LocalHistogramDoubleTreeMap(count, OUTSIDE);
 
         // Allocate result
         FloatProcessor res = (FloatProcessor) array.duplicate();
@@ -400,7 +387,7 @@ public class SlidingDiskStrel extends AbstractStrel implements Strel
 
         // create local histogram instance
         final double OUTSIDE = Double.POSITIVE_INFINITY; 
-        LocalHistogramDoubleHashMap localHisto = new LocalHistogramDoubleHashMap(count, OUTSIDE);
+        LocalHistogramDoubleTreeMap localHisto = new LocalHistogramDoubleTreeMap(count, OUTSIDE);
 
         // Allocate result
         FloatProcessor res = (FloatProcessor) array.duplicate();

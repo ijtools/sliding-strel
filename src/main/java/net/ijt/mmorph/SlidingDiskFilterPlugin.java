@@ -22,7 +22,6 @@
 package net.ijt.mmorph;
 
 
-import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
@@ -36,6 +35,7 @@ import inra.ijpb.algo.DefaultAlgoListener;
 import inra.ijpb.morphology.Morphology;
 import inra.ijpb.morphology.Morphology.Operation;
 import inra.ijpb.morphology.Strel;
+import net.ijt.mmorph.strel.NaiveDiskStrel;
 import net.ijt.mmorph.strel.SlidingDiskStrel;
 
 import java.awt.AWTEvent;
@@ -50,6 +50,8 @@ import java.awt.AWTEvent;
 public class SlidingDiskFilterPlugin implements ExtendedPlugInFilter,
 		DialogListener 
 {
+    public final static String[] algoList = new String[] {"Sliding Disk", "Naive Disk", "ImajeJ native"};
+    
 	/** Apparently, it's better to store flags in plugin */
 	private int flags = DOES_ALL | KEEP_PREVIEW | FINAL_PROCESSING | NO_CHANGES;
 	
@@ -70,6 +72,7 @@ public class SlidingDiskFilterPlugin implements ExtendedPlugInFilter,
 	private ImagePlus strelDisplay = null;
 	
 	Operation op = Operation.DILATION;
+	int algoIndex = 1;
 //	Strel.Shape shape = Strel.Shape.SQUARE;
 	int radius = 2;
 	boolean showStrel;
@@ -80,13 +83,6 @@ public class SlidingDiskFilterPlugin implements ExtendedPlugInFilter,
 	 */
 	public int setup(String arg, ImagePlus imp) 
 	{
-		// about...
-		if (arg.equals("about")) 
-		{
-			showAbout(); 
-			return DONE;
-		}
-
 		// Called at the end for cleaning the results
 		if (arg.equals("final")) 
 		{
@@ -117,8 +113,7 @@ public class SlidingDiskFilterPlugin implements ExtendedPlugInFilter,
 		
 		gd.addChoice("Operation", Operation.getAllLabels(), 
 				this.op.toString());
-//		gd.addChoice("Element", Strel.Shape.getAllLabels(), 
-//				this.shape.toString());
+		gd.addChoice("Element", algoList, algoList[algoIndex]);
 		gd.addNumericField("Radius (in pixels)", this.radius, 0);
 		gd.addCheckbox("Show Element", false);
 		gd.addPreviewCheckbox(pfr);
@@ -158,7 +153,7 @@ public class SlidingDiskFilterPlugin implements ExtendedPlugInFilter,
     {
 		// extract chosen parameters
 		this.op 		= Operation.fromLabel(gd.getNextChoice());
-//		this.shape 		= Strel.Shape.fromLabel(gd.getNextChoice());
+		this.algoIndex  = gd.getNextChoiceIndex();
 		this.radius 	= (int) gd.getNextNumber();		
 		this.showStrel 	= gd.getNextBoolean();
 		this.previewing = gd.getPreviewCheckbox().getState();
@@ -173,7 +168,16 @@ public class SlidingDiskFilterPlugin implements ExtendedPlugInFilter,
 	public void run(ImageProcessor image)
 	{
 		// Create structuring element with the chosen radius
-		Strel strel = new SlidingDiskStrel(radius);
+		Strel strel;
+		switch (algoIndex)
+		{
+            case 0: strel = new SlidingDiskStrel(radius); break;
+            case 1: strel = new NaiveDiskStrel(radius); break;
+            case 2: strel = Strel.Shape.DISK.fromRadius((int) radius); break;
+
+            default:
+                throw new RuntimeException("Unkown structuring element type");
+		}
 		
 		// add some listeners
 		DefaultAlgoListener.monitor(strel);
@@ -200,23 +204,6 @@ public class SlidingDiskFilterPlugin implements ExtendedPlugInFilter,
         }
 	}
 	
-	// About...
-	private void showAbout()
-	{
-		IJ.showMessage("MorphoLibJ",
-				"MorphoLibJ,\n" +
-				"http://imagej.net/MorphoLibJ\n" +
-				"\n" +
-				"by David Legland\n" +
-				"(david.legland@inra.fr)\n" + 
-				"by Ignacio Arganda-Carreras\n" +
-		        "(iargandacarreras@gmail.com)" + 
-		        "\n" + 
-		        "Project page:\n" + 
-                "https://github.com/ijpb/MorphoLibJ\n" 
-                );
-	}
-
 	private void resetPreview()
 	{
 		ImageProcessor image = this.imagePlus.getProcessor();
