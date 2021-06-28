@@ -12,7 +12,6 @@ import java.util.Locale;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.Prefs;
 import inra.ijpb.morphology.Strel3D;
 import net.sci.table.Table;
 import net.sci.table.io.DelimitedTableWriter;
@@ -22,7 +21,7 @@ import net.sci.table.io.TableWriter;
  * @author dlegland
  *
  */
-public class ImagejBallStrelTiming_MaizeTomoSub15
+public class Timing_Dil_Ball_Sliding_WheatGrainTomoSub15
 {
 
     /**
@@ -31,23 +30,19 @@ public class ImagejBallStrelTiming_MaizeTomoSub15
      */
     public static void main(String[] args) throws IOException
     {
-        String fileName = ImagejBallStrelTiming_MaizeTomoSub15.class.getResource("/images/wheatGrain_tomo_180a_sub15.tif").getFile();
+        String fileName = Timing_Dil_Ball_Sliding_WheatGrainTomoSub15.class.getResource("/images/wheatGrain_tomo_180a_sub15.tif").getFile();
         ImagePlus imagePlus = IJ.openImage(fileName);
         
         assertNotNull(imagePlus);
 
         ImageStack image = imagePlus.getStack();
         
-        System.out.println("image size: " + image.getWidth() + " x " + image.getHeight());
+        System.out.println("image size: " + image.getWidth() + " x " + image.getHeight() + " x " + image.getSize());
         
-//        double[] radiusList= new double[]{1.0, 2.0, 3.0, 4.0, 5.0};
-        double[] radiusList= new double[]{1.0, 2.0, 3.0, 4.0, 5.0, 7.0, 10.0, 15.0, 20.0};
+        double[] radiusList= new double[]{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 10.0, 12.0, 14.0, 16.0, 20.0, 30.0, 50.0};
         int nRadius = radiusList.length;
         int nRepets = 10;
         
-        // use a single thread for comparisons
-        Prefs.setThreads(1);
-
         Table table = Table.create(nRepets, nRadius + 1);
         String[] colNames = new String[nRadius+1];
         colNames[0] = "repet";
@@ -65,7 +60,7 @@ public class ImagejBallStrelTiming_MaizeTomoSub15
             for (int iRadius = 0; iRadius < radiusList.length; iRadius++)
             {
                 double radius = radiusList[iRadius];
-                Strel3D strel = Strel3D.Shape.BALL.fromRadius((int) radius);
+                Strel3D strel = new SlidingBallStrel3D(radius);
                 
                 long t0 = System.nanoTime();
                 strel.dilation(image);
@@ -74,12 +69,11 @@ public class ImagejBallStrelTiming_MaizeTomoSub15
                 double dt = (t1 - t0) / 1_000_000_000.0;
                 table.setValue(iRepet, iRadius + 1, dt);
                 System.out.println(String.format(Locale.ENGLISH, "radius = %5.1f, time = %7.3f s", radius, dt));
+
+                TableWriter writer = new DelimitedTableWriter(";");
+                writer.writeTable(table, new File("timing_dil_Ball_sliding_WheatGrainTomoSub15.csv"));
             }
         }
-        
-        TableWriter writer = new DelimitedTableWriter(";");
-        
-        writer.writeTable(table, new File("timing_imagejBall3D_WheatGrainTomo.csv"));
         
 //        // compute average
 //        int[] inds = new int[nRadius];
