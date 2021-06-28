@@ -9,6 +9,12 @@ import inra.ijpb.morphology.Strel;
 import inra.ijpb.morphology.strel.AbstractStrel;
 
 /**
+ * Naive implementation of disk structuring element. Used as reference
+ * implementation for evaluating Sliding structuring element.
+ * 
+ * @see SlidingDiskStrel
+ * @see NaiveBallStrel3D
+ * 
  * @author dlegland
  *
  */
