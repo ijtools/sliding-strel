@@ -270,7 +270,7 @@ public class SlidingBallStrel3D extends AbstractStrel3D
         
         // create local histogram instance
         final double OUTSIDE = Double.NEGATIVE_INFINITY;
-        LocalHistogramDoubleTreeMap localHisto = new LocalHistogramDoubleTreeMap(count, OUTSIDE);
+        LocalHistogramDoubleHashMap localHisto = new LocalHistogramDoubleHashMap(count, OUTSIDE);
 
         // Allocate result
         ImageStack resStack = stack.duplicate();
@@ -484,7 +484,7 @@ public class SlidingBallStrel3D extends AbstractStrel3D
         
         // create local histogram instance
         final double OUTSIDE = Double.POSITIVE_INFINITY;
-        LocalHistogramDoubleTreeMap localHisto = new LocalHistogramDoubleTreeMap(count, OUTSIDE);
+        LocalHistogramDoubleHashMap localHisto = new LocalHistogramDoubleHashMap(count, OUTSIDE);
 
         // Allocate result
         ImageStack resStack = stack.duplicate();
