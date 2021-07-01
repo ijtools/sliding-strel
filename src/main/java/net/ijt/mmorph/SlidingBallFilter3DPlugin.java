@@ -32,15 +32,21 @@ import inra.ijpb.morphology.Morphology;
 import inra.ijpb.morphology.Morphology.Operation;
 import inra.ijpb.morphology.Strel3D;
 import inra.ijpb.util.IJUtils;
+import net.ijt.mmorph.strel.NaiveBallStrel3D;
 import net.ijt.mmorph.strel.SlidingBallStrel3D;
 
 
 /**
- * Various morphological filters for 3D images.
- * 
- * It is possible to specify shapes that correspond to planar structuring
- * elements. In this case, the planar structuring element is stacked as many
- * times as necessary to fit the specified z size.
+ * Morphological filtering of 3D grayscale images using several implementation
+ * variants of ball structuring elements. Possible implementations are:
+ * <ul>
+ * <li>Naive implementation considering all the neighbors of the current
+ * voxel</li>
+ * <li>Sliding ball implementation that considers only changes between
+ * successive positions of the structuring element</li>
+ * <li>ImageJ's native implementation, that also considers all the neighbors of
+ * the current voxel</li>
+ * </ul>
  * 
  * @author David Legland
  *
@@ -48,7 +54,17 @@ import net.ijt.mmorph.strel.SlidingBallStrel3D;
 
 public class SlidingBallFilter3DPlugin implements PlugIn 
 {
-	/* (non-Javadoc)
+    // the list of available algorithms for comparison
+    public final static String[] algoList = new String[] {"Sliding Ball", "Naive Ball", "ImageJ native"};
+
+    // Settings for initializing the plugin dialog
+    Operation op = Operation.DILATION;
+    int algoIndex = 0;
+    double radius = 2;
+    boolean showStrel;
+    
+    
+    /* (non-Javadoc)
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -72,12 +88,9 @@ public class SlidingBallFilter3DPlugin implements PlugIn
 		GenericDialog gd = new GenericDialog("Morphological Filters (3D)");
 		
 		gd.addChoice("Operation", Operation.getAllLabels(), 
-				Operation.DILATION.toString());
-//		gd.addChoice("Element Shape", Strel3D.Shape.getAllLabels(), 
-//				Strel3D.Shape.CUBE.toString());
-		gd.addNumericField("Radius (in voxels)", 2, 0);
-//		gd.addNumericField("Y-Radius (in voxels)", 2, 0);
-//		gd.addNumericField("Z-Radius (in voxels)", 2, 0);
+				this.op.toString());
+		gd.addChoice("Method", algoList, algoList[algoIndex]);
+        gd.addNumericField("Radius (in voxels)", 2, 0);
 		gd.addCheckbox("Show Element", false);
 		
 		// Could also add an option for the type of operation
@@ -89,16 +102,24 @@ public class SlidingBallFilter3DPlugin implements PlugIn
 		long t0 = System.currentTimeMillis();
 
 		// extract chosen parameters
-		Operation op = Operation.fromLabel(gd.getNextChoice());
-//		Strel3D.Shape strelShape = Strel3D.Shape.fromLabel(gd.getNextChoice());
-		double radius = gd.getNextNumber();		
-//		int radiusY = (int) gd.getNextNumber();		
-//		int radiusZ = (int) gd.getNextNumber();		
-		boolean showStrel = gd.getNextBoolean();
+		op = Operation.fromLabel(gd.getNextChoice());
+		algoIndex = gd.getNextChoiceIndex();
+		radius = gd.getNextNumber();		
+		showStrel = gd.getNextBoolean();
 		
 		// Create structuring element of the given size
-//		Strel3D strel = strelShape.fromRadiusList(radiusX, radiusY, radiusZ);
-		Strel3D strel = new SlidingBallStrel3D(radius);
+        // Create structuring element with the chosen radius
+        Strel3D strel;
+        switch (algoIndex)
+        {
+            case 0: strel = new SlidingBallStrel3D(radius); break;
+            case 1: strel = new NaiveBallStrel3D(radius); break;
+            case 2: strel = Strel3D.Shape.BALL.fromRadius((int) radius); break;
+
+            default:
+                throw new RuntimeException("Unkown structuring element type");
+        }
+
 		strel.showProgress(true);
 		DefaultAlgoListener.monitor(strel);
 		

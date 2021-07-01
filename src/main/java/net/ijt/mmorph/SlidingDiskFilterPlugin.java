@@ -41,8 +41,16 @@ import net.ijt.mmorph.strel.SlidingDiskStrel;
 import java.awt.AWTEvent;
 
 /**
- * Plugin for computing various morphological filters on gray scale or color
- * images.
+ * Morphological filtering of grayscale images using several implementation
+ * variants of disk structuring elements. Possible implementations are:
+ * <ul>
+ * <li>Naive implementation considering all the neighbors of the current
+ * pixel</li>
+ * <li>Sliding disk implementation that considers only changes between
+ * successive positions of the structuring element</li>
+ * <li>ImageJ's native implementation, that also considers all the neighbors of
+ * the current pixel</li>
+ * </ul>
  *
  * @author David Legland
  *
@@ -50,7 +58,8 @@ import java.awt.AWTEvent;
 public class SlidingDiskFilterPlugin implements ExtendedPlugInFilter,
 		DialogListener 
 {
-    public final static String[] algoList = new String[] {"Sliding Disk", "Naive Disk", "ImajeJ native"};
+    // the list of available algorithms for comparison
+    public final static String[] algoList = new String[] {"Sliding Disk", "Naive Disk", "ImageJ native"};
     
 	/** Apparently, it's better to store flags in plugin */
 	private int flags = DOES_ALL | KEEP_PREVIEW | FINAL_PROCESSING | NO_CHANGES;
@@ -71,9 +80,10 @@ public class SlidingDiskFilterPlugin implements ExtendedPlugInFilter,
 	/** an instance of ImagePlus to display the Strel */
 	private ImagePlus strelDisplay = null;
 	
+
+	// Settings for initializing the plugin dialog
 	Operation op = Operation.DILATION;
-	int algoIndex = 1;
-//	Strel.Shape shape = Strel.Shape.SQUARE;
+	int algoIndex = 0;
 	int radius = 2;
 	boolean showStrel;
 	
@@ -113,7 +123,7 @@ public class SlidingDiskFilterPlugin implements ExtendedPlugInFilter,
 		
 		gd.addChoice("Operation", Operation.getAllLabels(), 
 				this.op.toString());
-		gd.addChoice("Element", algoList, algoList[algoIndex]);
+		gd.addChoice("Method", algoList, algoList[algoIndex]);
 		gd.addNumericField("Radius (in pixels)", this.radius, 0);
 		gd.addCheckbox("Show Element", false);
 		gd.addPreviewCheckbox(pfr);
